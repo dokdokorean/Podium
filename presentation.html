@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="./assets/logo.png" type="image/png" />
+  <title id="pageTitle">프리젠테이션 모드</title>
+  <style>
+    @font-face {
+        font-family: 'Pretendard-Bold';
+        src: url('./fonts/Pretendard-Bold.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Pretendard-Regular';
+        src: url('./fonts/Pretendard-Regular.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Pretendard-Light';
+        src: url('./fonts/Pretendard-Light.ttf') format('truetype');
+      }
+
+    :root {
+      --bg-color: black;
+      --text-color: white;
+    }
+
+    body.light {
+      --bg-color: white;
+      --text-color: black;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Pretendard-Medium';
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    #container {
+      flex-grow: 1;
+      min-width: 980px;
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+      overflow-y: auto;
+    }
+
+    #editor {
+      font-size: 50px;
+      line-height: 80px;
+      min-width: 50%;
+      max-width: 90%;
+    }
+
+    #editor > div {
+      white-space: pre-wrap;
+      margin-bottom: 100px;
+    }
+
+    .slide-break {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #EF2C22;
+        color: white;
+        padding: 8px 0;
+        height: 80px;
+        margin: 32px 0;
+        border-radius: 4px;
+        font-size: 24px;
+        transition: height 0.35s ease, font-size 0.35s ease;
+      }
+      
+    .right-sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 260px;
+        height: 100%;
+        background-color: #111;
+        color: white;
+        border-left: 1px solid #333;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        transition: transform 0.3s ease;
+        transform: translateX(0);
+        z-index: 10;
+        overflow: visible;
+      }
+      .right-sidebar.hidden {
+        transform: translateX(100%);
+      }
+
+      .right-sidebar input[type="range"] {
+        width: 100%;
+        accent-color: #959595; /* 기본 색 */
+        height: 32px; /* 높이를 늘려 thumb 영역 확보 */
+        background: transparent; /* 기본 배경 제거 */
+      }
+      
+      /* -------- WebKit 기반 (Chrome, Edge, Safari) -------- */
+      .right-sidebar input[type="range"]::-webkit-slider-runnable-track {
+        background: #fff;
+        height: 4px;               /* 얇게 */
+        border-radius: 4px;        /* 라운드 */
+        overflow: visible;
+      }
+      
+      .right-sidebar input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #959595;
+        border-radius: 50%;        /* 동그란 thumb */
+        margin-top: -5px;          /* 트랙 중심에 맞추기 (트랙 높이/2 - thumb 높이/2) */
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* -------- Firefox -------- */
+      .right-sidebar input[type="range"]::-moz-range-track {
+        background: #fff;
+        height: 4px;
+        border-radius: 4px;
+      }
+      
+      .right-sidebar input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: #959595;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      
+      
+
+    .slider-container, .checkbox-container {
+      margin-bottom: 24px;
+    }
+    .input {
+        width: 20px;
+        height: 20px;
+        accent-color: black; /* 체크 표시 색상 */
+        cursor: pointer;
+      }
+
+    .checkbox-container label {
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+    font-family: 'Pretendard-Regular';
+      gap: 15px;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-btn {
+      padding: 10px;
+      font-size: 16px;
+      background: white;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .toggle-mode {
+      background-color: #555;
+      color: white;
+    }
+
+    #toggleSidebarBtn {
+        position: fixed;
+        left: -40px;
+        top: 20px;
+        background-color: #444;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 999;
+        transition: right 0.3s ease;
+      }
+      
+      body.sidebar-hidden #toggleSidebarBtn {
+        right: 10px
+      }
+  
+  </style>
+</head>
+<body>
+<div id="container"><div id="editor"></div></div>
+  <div class="right-sidebar" id="rightSidebar">
+    <button id="toggleSidebarBtn" onclick="toggleSidebar()">⚙</button>
+    <div class="checkbox-container">
+      <p style="font-family: 'Pretendard-Regular';">Scroll Mode</p>
+      <label><input type="checkbox" class="input" id="sentenceMode"> Sentence By Sentence</label>
+      <label><input type="checkbox" class="input" id="autoMode"> Auto Scroll</label>
+    </div>
+
+    <div id="autoScrollOptions" style="display:none;">
+      <label for="speedSlider">스크롤 속도</label>
+      <input type="range" id="speedSlider" min="0.1" max="50" value="3" />
+    </div>
+
+    <div class="slider-container">
+      <label for="fontSizeSlider">글자 크기</label>
+      <input type="range" id="fontSizeSlider" min="20" max="150" value="50" />
+    </div>
+    <div class="slider-container">
+      <label for="lineHeightSlider">줄 간격</label>
+      <input type="range" id="lineHeightSlider" min="40" max="250" value="80" />
+    </div>
+
+    <div class="button-container">
+      <button class="control-btn" onclick="toggleFullScreen()">전체 화면</button>
+      <button class="control-btn toggle-mode" onclick="toggleTheme()">화면 모드 전환</button>
+    </div>
+  </div>
+  <script>
+    const editor = document.getElementById('editor');
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
+    const lineHeightSlider = document.getElementById('lineHeightSlider');
+    const speedSlider = document.getElementById('speedSlider');
+    const fontSizeValue = document.getElementById('fontSizeValue');
+    const lineHeightValue = document.getElementById('lineHeightValue');
+    const autoMode = document.getElementById('autoMode');
+    const sentenceMode = document.getElementById('sentenceMode');
+    const autoScrollOptions = document.getElementById('autoScrollOptions');
+    let scrollInterval = null;
+    let autoScrollActive = false;
+    let currentIndex = -1;
+
+    // 사이드바 토글
+    document.getElementById('toggleSidebarBtn').onclick = () => {
+      document.getElementById('rightSidebar').classList.toggle('hidden');
+    };
+
+    // 라이트/다크 모드 전환
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    // 전체화면 전환
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // 폰트/라인 간격 조절
+    fontSizeSlider.oninput = () => {
+      editor.style.fontSize = fontSizeSlider.value + 'px';
+    };
+    lineHeightSlider.oninput = () => {
+      editor.style.lineHeight = lineHeightSlider.value + 'px';
+    };
+
+    autoMode.onchange = () => {
+        resetScrollAndHighlight(); // 💡 추가
+        if (autoMode.checked) {
+          sentenceMode.checked = false;
+          autoScrollOptions.style.display = 'block';
+        } else {
+          autoScrollOptions.style.display = 'none';
+          stopAutoScroll();
+        }
+      };
+      
+      sentenceMode.onchange = () => {
+        resetScrollAndHighlight(); // 💡 추가
+        if (sentenceMode.checked) {
+          autoMode.checked = false;
+          autoScrollOptions.style.display = 'none';
+          stopAutoScroll();
+        }
+      };
+      
+      // 💡 새로 추가: 모드 변경 시 초기화 함수
+      function resetScrollAndHighlight() {
+        stopAutoScroll();
+        currentIndex = -1;
+        const divs = [...editor.querySelectorAll('div')];
+        divs.forEach(div => {
+          div.classList.remove('highlight');
+          div.style.color = '';
+          div.style.fontSize = '';
+          div.style.fontWeight = '';
+        });
+        document.getElementById('container').scrollTo({ top: 0 });
+      }
+      
+
+    // 자동 스크롤 동작
+    function startAutoScroll() {
+      if (scrollInterval) return;
+      scrollInterval = setInterval(() => {
+        document.getElementById('container').scrollBy({
+          top: speedSlider.value * 3,
+          behavior: 'smooth'
+        });
+      }, 30);
+      autoScrollActive = true;
+    }
+
+    function stopAutoScroll() {
+      clearInterval(scrollInterval);
+      scrollInterval = null;
+      autoScrollActive = false;
+    }
+
+    function toggleAutoScroll() {
+      if (autoScrollActive) {
+        stopAutoScroll();
+      } else {
+        startAutoScroll();
+      }
+    }
+
+    function highlightNextSentence() {
+        const divs = [...editor.querySelectorAll('div')];
+      
+        // 기존 하이라이트 제거 + 회색 처리
+        divs.forEach((div, index) => {
+            div.classList.remove('highlight');
+          
+            if (div.classList.contains('slide-break')) {
+              div.style.color = 'white';
+              div.style.fontSize = '24px';
+            } else {
+              div.style.color = 'gray';
+              div.style.fontWeight = 'normal';
+              div.style.fontSize = fontSizeSlider.value + 'px';
+            }
+          });
+                  
+        currentIndex++;
+        if (currentIndex >= divs.length) return;
+      
+        const current = divs[currentIndex];
+      
+        if (current.classList.contains('slide-break')) {
+            current.style.height = '200px';
+          
+            setTimeout(() => {
+              current.style.height = '80px';
+              highlightNextSentence();
+            }, 700);
+          
+            return;
+          }          
+      
+        current.classList.add('highlight');
+        current.style.color = 'var(--text-color)';
+        current.style.fontWeight = 'bold';
+        current.style.fontSize = (parseInt(fontSizeSlider.value) + 20) + 'px';
+      
+        const rect = current.getBoundingClientRect();
+        const scrollTop = document.getElementById('container').scrollTop;
+        const offset = rect.top + scrollTop - window.innerHeight / 3;
+        document.getElementById('container').scrollTo({ top: offset, behavior: 'smooth' });
+      }
+      
+
+    // 사용자 인터랙션
+    function handleUserTrigger() {
+      if (autoMode.checked) {
+        toggleAutoScroll();
+      } else if (sentenceMode.checked) {
+        highlightNextSentence();
+      }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('rightSidebar');
+        const body = document.body;
+      
+        sidebar.classList.toggle('hidden');
+        body.classList.toggle('sidebar-hidden'); // 이걸 꼭 유지해야 위 CSS가 작동함
+    }
+      
+    document.getElementById('editor').addEventListener('click', handleUserTrigger);
+    document.body.addEventListener('keydown', handleUserTrigger);
+
+    // 대본 로드
+    function loadScriptFromLocalStorageForPresentation() {
+      const target = JSON.parse(localStorage.getItem('presentationTarget'));
+      const scriptId = target?.id;
+      if (!scriptId) return;
+
+      const data = JSON.parse(localStorage.getItem('scripts') || '{}');
+      const script = data[scriptId];
+      if (!script) return;
+
+      const pageTitle = document.getElementById('pageTitle');
+      pageTitle.innerText = script.title || '프리젠테이션 모드';
+
+      if (!Array.isArray(script.contents)) return;
+
+      editor.innerHTML = script.contents.map(line => {
+        if (typeof line === 'number') {
+            if (line === 1) {
+              return`<div class="slide-break" contenteditable="false">다음 슬라이드</div>`;
+            }
+            return ''; // 0은 렌더링 안함
+          }
+          return `<div contenteditable="false">${line}</div>`;
+      }).join('');
+    }
+
+    window.onload = loadScriptFromLocalStorageForPresentation;
+  </script>
+</body>
+</html>

@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="./assets/logo.png" type="image/png" />
+  <title>Podium</title>
+  <style>
+    @font-face {
+      font-family: 'Pretendard-Bold';
+      src: url('./fonts/Pretendard-Bold.ttf') format('truetype');
+    }
+    @font-face {
+      font-family: 'Pretendard-Regular';
+      src: url('./fonts/Pretendard-Regular.ttf') format('truetype');
+    }
+    @font-face {
+      font-family: 'Pretendard-Light';
+      src: url('./fonts/Pretendard-Light.ttf') format('truetype');
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Pretendard-Regular', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #181818;
+      color: white;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #171717;
+      border-right: 1px solid #000;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .sidebar.hidden {
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+      opacity: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      color: #D1D1D1;
+      font-family: 'Pretendard-Light';
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .sidebar .logo .sidebar-toggle-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .new-btn {
+      background-color: #171717;
+      color: white;
+      border: none;
+      margin-bottom: 5px;
+      width: 200px;
+      min-width: 200px;
+      padding: 10px 0;
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .new-btn:hover {
+      background-color: #2a2a2a;
+    }
+
+    .recents {
+      flex-grow: 1;
+      border-top: 0.5px solid #5E5E5E;
+      padding-top: 8px;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .recents::-webkit-scrollbar {
+      display: none;
+    }
+
+    .recents-title {
+      font-size: 15px;
+      color: #9D9D9D;
+      margin-bottom: 8px;
+      padding-left: 5px;
+    }
+
+    .recent-item {
+      padding: 8px 12px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      width: 200px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .recent-item:hover {
+      background-color: #2a2a2a;
+    }
+
+    .more {
+      display: none;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    .recent-item:hover .more {
+      display: block;
+    }
+    .main {
+        flex-grow: 1;
+        padding: 32px;
+        padding-left: 50px;
+        overflow-y: auto;
+        position: relative;
+        max-width: 1280px;      /* ✅ 최대 너비 고정 */
+        margin: 0 auto;        /* ✅ 가운데 정렬 */
+      }      
+    #mainSidebarBtn {
+        position: absolute;
+        top: 15px;
+        left: 0px;
+        width: 50px;              /* 버튼 너비 */
+        height: 50px;             /* 버튼 높이 */
+        padding: 0;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: none;
+        z-index: 1000;
+        display: flex;
+        align-items: flex-start;  /* 수직 상단 정렬 */
+        justify-content: flex-start; /* 수평 좌측 정렬 */
+      }
+    .title-input {
+      background: none;
+      border: none;
+      outline: none;
+      color: rgb(155, 155, 155);
+      font-size: 18px;
+      width: 100%;
+      margin-bottom: 20px;
+      font-family: 'Pretendard-SemiBold';
+    }
+
+    .content-area {
+      background: none;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 30px;
+      width: 100%;
+      height: calc(100%-50px);
+      resize: none;
+      font-family: 'Pretendard-Light';
+      line-height: 50px;
+    }
+    .content-area-custom {
+        width: 100%;
+        height: calc(100%-50px);
+        padding: 0;
+        font-size: 30px;
+        font-family: 'Pretendard-Light';
+        color: white;
+        outline: none;
+        background: none;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+      .content-area-custom div {
+        margin-bottom: 60px; /* ✅ 간격 줄이기 */
+        line-height: 40px;
+      }
+
+    .example-link {
+      color: #aaa;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 10px;
+      display: inline-block;
+      font-family: 'Pretendard-Regular';
+    }
+
+    .sidebar.hidden + .main .floating-title {
+      left: 0;
+    }
+    .right-sidebar {
+        top: 0;
+        right: 0;
+        width: 250px;
+        min-width:250px ;
+        height: 100%;
+        background-color: #202020;
+        border-left: 1px solid #333;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 999;
+        transition: all 0.5s ease; /* ✅ ease-in 추가 */
+        margin-left: auto; /* ✅ 오른쪽 끝 정렬 */
+      }
+      
+      .right-sidebar.hidden {
+        width: 70px;
+        min-width:70px ;
+        padding: 16px;
+        overflow: hidden;
+        transition: all 0.5s ease;
+        position: relative;
+        margin-left: auto; 
+      }
+      
+      #collapsedSidebar {
+        position: fixed;
+        top: 20px;
+        right: 0;
+        background-color: #2a2a2a;
+        color: white;
+        width: 30px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 998;
+      }
+      
+      #collapsedSidebar.hidden {
+        display: none;
+      }
+      
+      #rephraseBtn {
+        background-color: #121212;
+        color: white;
+        border: none;
+        font-size: 14px;
+        border-radius: 4px;
+        cursor: pointer;
+        align-items: left;
+        transition: all 0.5s ease; /* ✅ ease-in 추가 */
+      }
+        #rephraseBtn:hover {
+            background-color: #2a2a2a;
+        }
+        #slideToggleBtn { 
+            background-color: #121212;
+            color: white;
+            border: none;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.5s ease; /* ✅ ease-in 추가 */
+          }
+        #slideToggleBtn:hover {
+            background-color: #2a2a2a;
+          }
+        .right-sidebar.hidden button:not(.close-btn):not(#presentationBtn):not(#rightsidebtn),
+        .right-sidebar.hidden p.description,
+        .right-sidebar.hidden div.description {
+          opacity: 0;
+          transform: translateX(20px);
+          pointer-events: none;
+        }
+        #presentationBtn {
+            display: flex;
+            align-items: center;
+            background-color: #F2F2F2;
+            color: #111111;
+            border: #4E4E4E 0.5px solid;
+            padding: 10px;
+            border: none;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          
+          #presentationBtn:hover {
+            background-color: #bdbdbd;
+          }
+          
+          .right-sidebar.hidden #presentationBtn .label {
+            display: none;
+          }
+          
+      .close-btn{
+        color: none;
+        width:25px;
+        height:25px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        right: 10px;
+      }
+      
+      .right-sidebar .description {
+        font-size: 12px;
+        color: #bbb;
+        margin: 0;
+      }
+      
+      #slideToggleBtn.active {
+        background-color: white;
+        color: black;
+      }
+      
+      .slide-break {
+        display: flex;                /* 추가 */
+        align-items: center;         /* 수직 정렬 */
+        justify-content: center;     /* 수평 정렬 */
+        background-color: #EF2C22;
+        color: white;
+        padding: 8px 0;
+        height: 80px;
+        margin: 16px 0;
+        border-radius: 4px;
+        font-size: 25px;
+        font-family: 'Pretendard-Medium';
+      }
+      
+      .slide-hover {
+        background-color: rgba(255, 0, 0, 0.1);
+        height: 30px;
+        margin: 8px 0;
+        cursor: pointer;
+      }
+      .rightsidebar-toggle-btn{
+        top: 15px;
+        left: 0px;
+        width: 40px;              /* 버튼 너비 */
+        height: 40px;             /* 버튼 높이 */
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+      }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="logo">
+      <img src="./assets/logo.png" alt="logo" style="width:32px; height:32px; margin-right:10px;">
+      Podium
+      <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+        <img src="./assets/closesidebar.png" alt="toggle sidebar" style="width: 30px; height: 30px;" />
+      </button>
+    </div>
+    <button class="new-btn" onclick="createNewScript()">
+        <img src="./assets/NewScript.png" alt="new" style="width:25px; height:25px; margin-right:10px; margin-left:5px;">
+        새로운 대본
+      </button>
+      <div class="recents" id="recents">
+        <div class="recents-title">recents</div>
+      </div>
+    </div>
+    <div class="main" id="main">
+      <input class="title-input" id="titleInput" placeholder="Untitled" />
+      <div id="editor" contenteditable="true" class="content-area-custom"></div>
+      <div class="example-link" id="exampleLink" onclick="loadExample()">활용 예시 보기 . . .</div>
+    </div>
+    <button class="sidebar-toggle-btn" id="mainSidebarBtn" onclick="toggleSidebar()">
+        <img src="./assets/sidebar.png" alt="toggle sidebar" style="width: 20px; height: 16px;" />
+      </button>
+      <div class="right-sidebar" id="rightSidebar">
+        <button class="rightsidebar-toggle-btn" id="rightsidebtn" onclick="toggleRightSidebar()">
+            <img src="./assets/rightsidebar.png" alt="toggle sidebar" style="width: 28px; height: 28px;" />
+          </button>
+        <button id="presentationBtn" onclick="goToPresentationMode()">
+            <img src="./assets/presentation.png"style="width: 16px; height: 16px; margin-right:10px" class="icon" />
+            <span style="min-width: 150px;" class="label">프리젠테이션 모드</span>
+          </button>
+        <div class="description" style="margin-top: 20px; font-size: 14px; font-family: 'Pretendard-Regular'; color: #D1D1D1; border-top: 1px solid #333; padding-top: 10px;">
+            편집기
+        </div>
+        <button id="rephraseBtn">
+            <p style="min-width: 200px;">
+                문장 정리하기
+            </p>
+        </button>
+        <p style="min-width: 200px;"class="description">읽기 쉬운 대본으로 정리해드릴게요</p>
+        <button id="slideToggleBtn" onclick="toggleSlideMode()">
+            <p style="min-width: 200px;">
+                슬라이드 넘김 표시하기
+            </p>
+        </button>
+        <p style="min-width: 200px;"id="slideHint" class="description">대본에 슬라이드 넘김 위치를 표시해보세요</p>
+      </div>  
+    <script>
+      let currentId = null;
+      let currentScriptId = null;
+
+      function scriptData() {
+        return JSON.parse(localStorage.getItem('scripts') || '{}');
+      }
+
+      function goToPresentationMode() {
+        if (!currentScriptId) {
+          alert('대본이 선택되지 않았습니다.');
+          return;
+        }
+      
+        localStorage.setItem('presentationTarget', JSON.stringify({
+          id: currentScriptId
+        }));
+      
+        window.open('presentation.html', '_blank');
+      }
+  
+      function saveToLocalStorage(id, title, contents) {
+        const data = JSON.parse(localStorage.getItem('scripts') || '{}');
+        data[id] = { title, contents };
+        localStorage.setItem('scripts', JSON.stringify(data));
+        renderRecents();
+      }
+  
+      function createNewScript() {
+        const id = Date.now().toString();
+        currentId = id;
+        currentScriptId = id;
+        saveToLocalStorage(id, '', ['']);
+        document.getElementById('titleInput').value = '';
+        document.getElementById('editor').innerHTML = '';
+        checkExampleVisibility();
+        ensureInitialLineAndFocus(); // ✅ 추가
+      }
+  
+      function renderRecents() {
+        const recents = document.getElementById('recents');
+        recents.innerHTML = '<div class="recents-title">Recents</div>';
+        const data = JSON.parse(localStorage.getItem('scripts') || '{}');
+        const entries = Object.entries(data).sort((a, b) => b[0] - a[0]);
+        for (const [id, script] of entries) {
+          const div = document.createElement('div');
+          div.className = 'recent-item';
+          div.innerText = script.title || 'Untitled';
+          div.onclick = () => loadScript(id);
+          const more = document.createElement('button');
+          more.className = 'more';
+          more.innerText = '⋮';
+          more.onclick = (e) => {
+            e.stopPropagation();
+            if (confirm('정말 삭제하시겠습니까?')) {
+              deleteScript(id);
+            }
+          };
+          div.appendChild(more);
+          recents.appendChild(div);
+        }
+      }
+  
+      function deleteScript(id) {
+        const data = JSON.parse(localStorage.getItem('scripts') || '{}');
+        delete data[id];
+        localStorage.setItem('scripts', JSON.stringify(data));
+        renderRecents();
+      }
+  
+      function loadScript(id) {
+        const data = JSON.parse(localStorage.getItem('scripts') || '{}');
+        const script = data[id];
+        if (script) {
+          currentId = id;
+          currentScriptId = id;
+          document.getElementById('titleInput').value = script.title;
+      
+          const html = script.contents.map((line, idx) => {
+            if (typeof line === 'number') {
+              if (line === 1) {
+                return `<div class="slide-break" data-index="${idx}" contenteditable="false">다음 슬라이드</div>`;
+              }
+              return ''; // 0은 렌더링 안함
+            }
+            return `<div>${line}</div>`;
+          }).join('');
+      
+          document.getElementById('editor').innerHTML = html;
+      
+          // 슬라이드 클릭 시 삭제 처리
+          document.querySelectorAll('.slide-break').forEach(el => {
+            el.addEventListener('click', (e) => {
+              if (!isSlideMode) return; // 슬라이드 모드에서만 작동
+              const idx = Number(el.getAttribute('data-index'));
+              toggleSlideBreak(idx);
+            });
+          });
+        }
+      
+        checkExampleVisibility();
+        ensureInitialLineAndFocus();
+      }
+      
+      
+      function handleContentInput() {
+        const editor = document.getElementById('editor');
+        const divs = Array.from(editor.children);
+        const newContents = [];
+      
+        for (let i = 0; i < divs.length; i++) {
+          const div = divs[i];
+      
+          if (div.classList.contains('slide-break')) {
+            newContents.push(1);
+          } else {
+            const text = div.innerText.trim();
+            if (text !== '') {
+              newContents.push(text);
+              // 문장 뒤에 자동으로 0 삽입 (다음 줄을 기본적으로 의미)
+              // 단, 다음 줄이 slide-break이면 생략할 수도 있음
+              const next = divs[i + 1];
+              if (!next || !next.classList.contains('slide-break')) {
+                newContents.push(0);
+              }
+            }
+          }
+        }
+      
+        const title = document.getElementById('titleInput').value;
+        if (currentId) {
+          saveToLocalStorage(currentId, title, newContents);
+        }
+      
+        checkExampleVisibility();
+      }
+      
+      function loadExample() {
+        const example = {
+          title: '안녕하세요.',
+          contents: [
+            '첫 번째 문장입니다.',
+            1,
+            '두 번째 문장입니다.',
+            0,
+            '세 번째 문장입니다.'
+          ]
+        };
+      
+        const id = 'example_' + Date.now();
+        currentId = id;
+        currentScriptId = id;
+        saveToLocalStorage(id, example.title, example.contents);
+        document.getElementById('titleInput').value = example.title;
+      
+        const html = example.contents.map((line, idx) => {
+          if (typeof line === 'number') {
+            if (line === 1) {
+              return `<div class="slide-break" data-index="${idx}" contenteditable="${isSlideMode ? 'false' : 'true'}">다음 슬라이드</div>`;
+            }
+            return '';
+          }
+          return `<div>${line}</div>`;
+        }).join('');
+      
+        document.getElementById('editor').innerHTML = html;
+      
+        // 👇 슬라이드 넘김 클릭 시 제거 동작 추가
+        document.querySelectorAll('.slide-break').forEach(el => {
+          el.addEventListener('click', (e) => {
+            if (!isSlideMode) return; // 슬라이드 모드에서만 삭제 가능
+            const idx = Number(el.getAttribute('data-index'));
+            toggleSlideBreak(idx);
+          });
+        });
+      
+        checkExampleVisibility();
+      }      
+
+      function toggleSlideBreak(index) {
+        const scripts = scriptData();
+        const script = scripts[currentScriptId];
+        if (!script || !Array.isArray(script.contents)) return;
+      
+        if (script.contents[index] === 1) {
+          script.contents[index] = 0;
+          localStorage.setItem('scripts', JSON.stringify(scripts));
+          loadScript(currentScriptId); // 다시 그리기
+          if (isSlideMode) showSlideInsertZones();
+        }
+      }
+      
+      
+      function checkExampleVisibility() {
+        const editor = document.getElementById('editor');
+        const hasText = editor.innerText.trim().length > 0;
+        document.getElementById('exampleLink').style.display = hasText ? 'none' : 'inline-block';
+      }
+  
+      document.getElementById('titleInput').addEventListener('input', () => {
+        handleContentInput();
+      });
+  
+      document.getElementById('editor').addEventListener('input', () => {
+        handleContentInput();
+      });
+  
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainSidebarBtn = document.getElementById('mainSidebarBtn');
+        sidebar.classList.toggle('hidden');
+        mainSidebarBtn.style.display = sidebar.classList.contains('hidden') ? 'block' : 'none';
+      }
+  
+      function scrollToTop() {
+        document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+      }
+  
+      window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('mainSidebarBtn').style.display = 'none';
+        renderRecents();
+        createNewScript();
+        ensureInitialLineAndFocus(); // ✅ 추가
+      });
+      
+      function toggleRightSidebar() {
+        const sidebar = document.getElementById('rightSidebar');
+        const isHidden = sidebar.classList.toggle('hidden');
+        
+        // 슬라이드 모드 비활성화 시 break 편집 허용
+        if (!isHidden && !isSlideMode) {
+          Array.from(document.getElementsByClassName('slide-break')).forEach(e => {
+            e.contentEditable = 'true';
+          });
+        }
+      }
+            
+      let isSlideMode = false;
+
+      function toggleSlideMode() {
+        isSlideMode = !isSlideMode;
+        updateEditorEditableState()
+        const btn = document.getElementById('slideToggleBtn');
+        const label = btn.querySelector('p'); // 내부 텍스트 요소
+        const hint = document.getElementById('slideHint');
+      
+        if (isSlideMode) {
+          btn.classList.add('active');
+          if (label) label.innerText = '표시할 위치 선택 중…';
+          if (hint) hint.innerText = '다음 슬라이드로 넘어갈 위치를 클릭해 표시해보세요';
+          showSlideInsertZones();
+      
+          // break 편집 막기
+          Array.from(document.getElementsByClassName('slide-break')).forEach(e => {
+            e.contentEditable = 'false';
+          });
+        } else {
+          btn.classList.remove('active');
+          if (label) label.innerText = '슬라이드 넘김 표시하기';
+          if (hint) hint.innerText = '대본에 슬라이드 넘김 위치를 표시해보세요';
+          removeSlideInsertZones();
+      
+          // break 편집 허용
+          Array.from(document.getElementsByClassName('slide-break')).forEach(e => {
+            e.contentEditable = 'true';
+          });
+        }
+      }
+      function updateEditorEditableState() {
+        const editor = document.getElementById('editor');
+        editor.setAttribute('contenteditable', isSlideMode ? 'false' : 'true');
+      }
+      
+      function showSlideInsertZones() {
+        const editor = document.getElementById('editor');
+        const children = Array.from(editor.children);
+        const script = JSON.parse(localStorage.getItem('scripts') || '{}')[currentScriptId];
+      
+        // 기존 hover 모두 제거
+        removeSlideInsertZones();
+      
+        if (!script || !Array.isArray(script.contents)) return;
+      
+        let visualIndex = 0;
+      
+        for (let i = 0; i < script.contents.length; i++) {
+          if (script.contents[i] === 0) {
+            const spacer = document.createElement('div');
+            spacer.className = 'slide-hover';
+            spacer.addEventListener('click', (e) => {
+              e.stopPropagation();
+              script.contents[i] = 1; // 0을 1로 바꿔 슬라이드 표시
+              localStorage.setItem('scripts', JSON.stringify({ ...scriptData(), [currentScriptId]: script }));
+              loadScript(currentScriptId); // 새로 렌더링
+              if (isSlideMode) showSlideInsertZones(); // 다시 hover 복원
+            });
+      
+            // children[visualIndex] 앞에 넣음
+            const target = children[visualIndex];
+            if (target) {
+              editor.insertBefore(spacer, target);
+            } else {
+              editor.appendChild(spacer);
+            }
+          } else {
+            visualIndex++; // 0이 아닌 경우 실제 div가 하나 렌더링되었음
+          }
+        }
+      }
+      
+      
+      function removeSlideInsertZones() {
+        const editor = document.getElementById('editor');
+        Array.from(editor.getElementsByClassName('slide-hover')).forEach(e => e.remove());
+      }
+      
+
+      function insertSlideBreak(index) {
+        const editor = document.getElementById('editor');
+        const script = JSON.parse(localStorage.getItem('scripts') || '{}')[currentScriptId];
+        if (!script || !Array.isArray(script.contents)) return;
+      
+        // slide-break 삽입/제거는 데이터에서 처리
+        if (typeof script.contents[index] === 'number') {
+          // 1이면 → 0으로 바꿈 (슬라이드 제거)
+          script.contents[index] = 0;
+        } else {
+          // 기존 문자열 사이에 없는 경우 → 1을 끼워 넣음
+          script.contents.splice(index, 0, 1);
+        }
+      
+        // 저장 및 다시 렌더링
+        const allScripts = JSON.parse(localStorage.getItem('scripts') || '{}');
+        allScripts[currentScriptId] = script;
+        localStorage.setItem('scripts', JSON.stringify(allScripts));
+      
+        loadScript(currentScriptId); // 새로 렌더링
+        if (isSlideMode) showSlideInsertZones(); // hover 복원
+      }
+      
+  
+      const main = document.getElementById('main');
+      const titleInput = document.getElementById('titleInput');
+      const floatingTitle = document.getElementById('floatingTitle');
+
+      function ensureInitialLineAndFocus() {
+        const editor = document.getElementById('editor');
+        if (editor.innerHTML.trim() === '') {
+          const line = document.createElement('div');
+          editor.appendChild(line);
+        }
+        // 포커스 설정
+        editor.focus();
+        const range = document.createRange();
+        const sel = window.getSelection();
+        const lastLine = editor.lastChild;
+        range.setStart(lastLine, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+        
+    </script>
+  </body>
+  </html>
