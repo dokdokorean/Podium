@@ -224,6 +224,7 @@
       left: 0;
     }
     .right-sidebar {
+        position: fixed;
         top: 0;
         right: 0;
         width: 250px;
@@ -249,6 +250,7 @@
         position: relative;
         margin-left: auto; 
       }
+
       
       #collapsedSidebar {
         position: fixed;
@@ -267,6 +269,33 @@
       
       #collapsedSidebar.hidden {
         display: none;
+      }
+      
+      @media (max-width: 768px) {
+        .right-sidebar {
+          width: 100%;
+          min-width: 100%;
+          height: 60%;                   /* ✅ 바텀시트 높이 */
+          bottom: 0;                     /* ✅ 아래로 붙임 */
+          top: auto;                     /* ✅ 위에서 떨어지는 걸 막음 */
+          left: 0;
+          right: 0;
+          border-left: none;
+          border-top: 1px solid #333;
+          border-radius: 12px 12px 0 0;
+          padding: 20px;
+          transition: transform 0.3s ease;
+          box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+        }
+      
+        .right-sidebar.hidden {
+            position: fixed;
+          transform: translateY(90%);
+        }
+      
+        #collapsedSidebar {
+          display: none; /* 모바일에선 안 보이게 */
+        }
       }
       
       #rephraseBtn {
@@ -429,6 +458,15 @@
       let currentId = null;
       let currentScriptId = null;
 
+      function updateSidebarVisibility() {
+        const sidebar = document.getElementById('sidebar');
+        if (window.innerWidth <= 768) {
+          sidebar.classList.add('hidden');
+        } else {
+          sidebar.classList.remove('hidden');
+        }
+      }
+
       function scriptData() {
         return JSON.parse(localStorage.getItem('scripts') || '{}');
       }
@@ -544,8 +582,6 @@
             const text = div.innerText.trim();
             if (text !== '') {
               newContents.push(text);
-              // 문장 뒤에 자동으로 0 삽입 (다음 줄을 기본적으로 의미)
-              // 단, 다음 줄이 slide-break이면 생략할 수도 있음
               const next = divs[i + 1];
               if (!next || !next.classList.contains('slide-break')) {
                 newContents.push(0);
@@ -564,13 +600,32 @@
       
       function loadExample() {
         const example = {
-          title: '안녕하세요.',
+          title: '스타벅스는 왜 비싸도 잘 팔릴까?',
           contents: [
-            '첫 번째 문장입니다.',
+            '안녕하세요. 저희는 오늘 "스타벅스는 왜 비싸도 잘 팔릴까?"라는 주제로 발표를 진행하겠습니다.',
             1,
-            '두 번째 문장입니다.',
+            '혹시 여러분, 스타벅스 커피 가격이 평균 5천 원이 넘는다는 사실 알고 계셨나요?',
             0,
-            '세 번째 문장입니다.'
+            '그런데도 항상 매장은 붐빕니다.',
+            0,
+            '우리는 단순히 "브랜드니까"라고 넘길 수도 있지만,',
+            0,
+            '그 이면에는 정교한 프리미엄 전략이 숨어있습니다.',
+            0,
+            '오늘은 이 전략을 마케팅 관점에서 분석해보겠습니다.',
+            1,
+            '스타벅스는 단순히 커피를 파는 브랜드가 아닙니다.',
+            1,
+            '스타벅스는 ‘경험’을 팝니다.',
+            1,
+            '매장 인테리어, 고객 이름을 불러주는 문화, 개인 맞춤 음료 등은 고객에게',
+            0,
+            '‘나만을 위한 서비스’라는 느낌을 줍니다.',
+            0,
+            '이건 단순히 제품이 아닌 경험 가치를',
+            0,
+            '중심으로 한 프리미엄 전략입니다.',
+            0
           ]
         };
       
@@ -647,7 +702,8 @@
         document.getElementById('mainSidebarBtn').style.display = 'none';
         renderRecents();
         createNewScript();
-        ensureInitialLineAndFocus(); // ✅ 추가
+        ensureInitialLineAndFocus();
+        updateSidebarVisibility();
       });
       
       function toggleRightSidebar() {
@@ -773,8 +829,9 @@
       function ensureInitialLineAndFocus() {
         const editor = document.getElementById('editor');
         if (editor.innerHTML.trim() === '') {
-          const line = document.createElement('div');
-          editor.appendChild(line);
+            const line = document.createElement('div');
+            line.innerHTML = '<br>'
+            editor.appendChild(line);
         }
         // 포커스 설정
         editor.focus();
@@ -786,7 +843,7 @@
         sel.removeAllRanges();
         sel.addRange(range);
       }
-        
+      window.addEventListener('resize', updateSidebarVisibility);
     </script>
   </body>
   </html>
