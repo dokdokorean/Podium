@@ -150,6 +150,7 @@
     .main {
         flex-grow: 1;
         padding: 40px;
+        min-width: 300px;
         max-width: calc(100% - 300px);
         padding-top: 32px;
         overflow-y: auto;
@@ -231,7 +232,7 @@
         top: 0;
         right: 0;
         width: 250px;
-        min-width:250px ;
+        min-width:180px ;
         height: 100%;
         background-color: #202020;
         border-left: 1px solid #333;
@@ -408,23 +409,23 @@
           </button>
         <button id="presentationBtn" onclick="goToPresentationMode()">
             <img src="./assets/presentation.png"style="width: 16px; height: 16px; margin-right:10px" class="icon" />
-            <span style="min-width: 150px;" class="label">프리젠테이션 모드</span>
+            <span style="min-width: 150px; text-align :center;" class="label">프리젠테이션 모드</span>
           </button>
         <div class="description" style="margin-top: 20px; font-size: 14px; font-family: 'Pretendard-Regular'; color: #D1D1D1; border-top: 1px solid #333; padding-top: 10px;">
             편집기
         </div>
         <button id="rephraseBtn">
-            <p style="min-width: 200px;">
-                문장 정리하기
+          <p style="min-width: 100px; text-align :center">
+            문장 정리하기
             </p>
         </button>
-        <p style="min-width: 200px;"class="description">읽기 쉬운 대본으로 정리해드릴게요</p>
+        <p style="min-width: 100px;"class="description">읽기 쉬운 대본으로 정리해드릴게요</p>
         <button id="slideToggleBtn" onclick="toggleSlideMode()">
-            <p style="min-width: 200px;">
-                슬라이드 넘김 표시하기
+            <p style="min-width: 140px; text-align :center">
+                슬라이드 구분 삽입
             </p>
         </button>
-        <p style="min-width: 200px;"id="slideHint" class="description">대본에 슬라이드 넘김 위치를 표시해보세요</p>
+        <p style="min-width: 100px;"id="slideHint" class="description">대본에 슬라이드 넘김 위치를 표시해보세요</p>
       </div>  
     <script>
       let currentId = null;
@@ -468,6 +469,12 @@
         saveToLocalStorage(id, '', ['']);
         document.getElementById('titleInput').value = '';
         document.getElementById('editor').innerHTML = '';
+        const editor = document.getElementById('editor');
+        if (editor.innerHTML.trim() === '') {
+            const line = document.createElement('div');
+            line.innerHTML = '<br>'
+            editor.appendChild(line);
+        }
         checkExampleVisibility();
         ensureInitialLineAndFocus(); // ✅ 추가
       }
