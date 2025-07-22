@@ -43,7 +43,11 @@
       flex-grow: 1;
       display: flex;
       justify-content: center;
-      padding: 40px;
+      padding-left: 40px;
+      padding-right: 40px;
+      padding-top: 80px;
+
+
       overflow-y: auto;
     }
 
@@ -53,6 +57,12 @@
       min-width: 50%;
       max-width: 90%;
     }
+    #editor::after {
+      content: '';
+      display: block;
+      height: 500px; /* 원하는 여백 크기 */
+    }
+    
 
     #editor > div {
       white-space: pre-wrap;
@@ -78,18 +88,19 @@
           bottom: 0;
           left: 0;
           right: 0;
-          width: 100vw;
-          padding: 10px;
+          width: 100%;
+          padding: 30px;
           background-color: #000000;
-          border-left: 1px solid #333;
-          color: white; /* ✅ 글자색을 항상 흰색으로 고정 */
+          color: white;
           border-left: none;
           border-top: 1px solid #333;
           transform: translateY(0);
           transition: transform 0.3s ease;
           z-index: 20;
           overflow: visible;
+          box-sizing: border-box; /* ✅ 핵심 해결 */
         }
+        
       
         .right-sidebar.hidden {
           transform: translateY(100%);
@@ -155,7 +166,6 @@
       }
       
       .right-sidebar input[type="range"] {
-        width: 70%;
         accent-color: #959595; /* 기본 색 */
         height: 32px; /* 높이를 늘려 thumb 영역 확보 */
         background: transparent; /* 기본 배경 제거 */
@@ -221,7 +231,6 @@
     .button-container {
       display: flex;
       flex-direction: column;
-      width: 80%;
       gap: 10px;
     }
 
@@ -277,7 +286,8 @@
   <div class="right-sidebar" id="rightSidebar">
     <button id="toggleSidebarBtn" onclick="toggleSidebar()">⚙</button>
     <div class="checkbox-container">
-      <p style="font-family: 'Pretendard-Regular';">Scroll Mode</p>
+      <p style="font-family: 'Pretendard-Regular'; margin-bottom:0px;">Scroll Mode</p>
+      <p style="font-family: 'Pretendard-Regular'; margin-top:5px;color:#959595; font-size:12px">모드를 고르고 화면을 클릭하여 시작하세요</p>
       <label><input type="checkbox" class="input" id="sentenceMode"> Sentence By Sentence</label>
       <label><input type="checkbox" class="input" id="autoMode"> Auto Scroll</label>
     </div>
@@ -286,7 +296,7 @@
       <label for="speedSlider">스크롤 속도</label>
       <div style="display: flex; align-items: center; gap: 10px;">
         <img src="./assets/turtle.png" style="height: 25px;" />
-        <input type="range" id="speedSlider" min="0.1" max="5" step="0.01" value="3"/>
+        <input type="range" id="speedSlider" min="0.1" max="5" step="0.01" style="flex: 1;"value="3"/>
         <img src="./assets/rabbit.png" style="height: 25px;" />
       </div>
     </div>
@@ -295,7 +305,7 @@
       <label for="fontSizeSlider">글자 크기</label>
       <div style="display: flex; align-items: center; flex-direction: row; gap: 10px;">
         <p style="font-size: 10px; font-family: 'Pretendard-Regular'; margin: 0;">Aa</p>
-        <input type="range" id="fontSizeSlider" min="20" max="150" value="50" />
+        <input type="range" id="fontSizeSlider" min="20" max="150" value="50" style="flex: 1;" />
         <p style="font-size: 25px; line-height: 1; font-family: 'Pretendard-Regular'; margin: 0;">Aa</p>
       </div>
     </div>
@@ -303,7 +313,7 @@
       <label for="fontWeightSlider">글자 굵기</label>
       <div style="display: flex; align-items: center; flex-direction: row; gap: 10px;">
         <p style="font-family: 'Pretendard-Light'; margin: 0;">Aa</p>
-        <input type="range" id="fontWeightSlider" min="100" max="900" step="1" value="900" />
+        <input type="range" id="fontWeightSlider" min="100" max="900" step="1" value="900" style="flex: 1;"/>
         <p style="font-family: 'Pretendard-Bold'; margin: 0;">Aa</p>
       </div>
     </div>
@@ -312,7 +322,7 @@
       <label for="lineHeightSlider">줄 간격</label>
       <div style="display: flex; align-items: center; flex-direction: row; gap: 10px;">
         <p style="font-size: 18px; font-family: 'Pretendard-Light'; margin: 0;">1</p>
-        <input type="range" id="lineHeightSlider" min="40" max="250" value="80" />
+        <input type="range" id="lineHeightSlider" min="40" max="250" value="80"style="flex: 1;" />
         <p style="font-size: 18px; line-height: 1; font-family: 'Pretendard-Light'; margin: 0;">100</p>
       </div>
     </div>
@@ -533,8 +543,12 @@
     }
       
     document.getElementById('editor').addEventListener('click', handleUserTrigger);
-    document.body.addEventListener('keydown', handleUserTrigger);
-
+    document.body.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault(); // ✅ 스페이스바의 기본 스크롤 동작 막기
+      }
+      handleUserTrigger();
+    });
     // 대본 로드
     function loadScriptFromLocalStorageForPresentation() {
       const target = JSON.parse(localStorage.getItem('presentationTarget'));
